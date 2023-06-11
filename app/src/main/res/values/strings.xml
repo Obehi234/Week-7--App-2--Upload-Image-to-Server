@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Week 7- App2- Upload File to Server</string>
+    <string name="click_to_choose_image">Click to Choose Image</string>
+    <string name="uploaded_image">Uploaded Image</string>
 </resources>

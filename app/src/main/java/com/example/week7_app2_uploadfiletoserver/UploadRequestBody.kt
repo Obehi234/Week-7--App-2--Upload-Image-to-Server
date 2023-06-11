@@ -3,6 +3,7 @@ package com.example.week7_app2_uploadfiletoserver
 import android.os.Handler
 import android.os.Looper
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okio.BufferedSink

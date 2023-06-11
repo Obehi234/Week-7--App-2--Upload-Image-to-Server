@@ -9,11 +9,13 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.util.Log
 import android.view.View
 import android.webkit.PermissionRequest
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -28,11 +30,13 @@ import retrofit2.Response
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.io.IOException
 import java.security.Permission
 
 class MainActivity : AppCompatActivity(), UploadRequestBody.UploadCallback {
     private var selectedImageUri: Uri? = null
     private lateinit var image_view: ImageView
+    private lateinit var textView: TextView
     private lateinit var button_upload: Button
     private lateinit var layout_root: ConstraintLayout
     private lateinit var progress_bar: ProgressBar
@@ -45,7 +49,8 @@ class MainActivity : AppCompatActivity(), UploadRequestBody.UploadCallback {
         setContentView(R.layout.activity_main)
 
         image_view = findViewById(R.id.image_view)
-        image_view.setOnClickListener {
+        textView = findViewById(R.id.textView)
+        textView.setOnClickListener {
             openImageChooser()
         }
 
@@ -95,6 +100,8 @@ class MainActivity : AppCompatActivity(), UploadRequestBody.UploadCallback {
             layout_root.snackbar("Select an Image First")
             return
         }
+
+        try {
         val parcelFileDescriptor = contentResolver.openFileDescriptor(
             selectedImageUri!!, "r", null
         ) ?: return
@@ -115,23 +122,32 @@ class MainActivity : AppCompatActivity(), UploadRequestBody.UploadCallback {
             ),
             RequestBody.create("multipart/form-data".toMediaTypeOrNull(), "json")
         ).enqueue(object : Callback<UploadResponse> {
+
             override fun onResponse(
                 call: Call<UploadResponse>,
                 response: Response<UploadResponse>
             ) {
                 response.body()?.let {
                     layout_root.snackbar(it.message)
+                    Log.d("File Upload", "File Upload Successful")
                     progress_bar.progress = 100
                 }
             }
 
             override fun onFailure(call: Call<UploadResponse>, t: Throwable) {
                 layout_root.snackbar(t.message!!)
+                Log.d("File Upload", "File Upload Failed")
                 progress_bar.progress = 0
             }
 
         })
 
+    } catch (e: IOException) {
+        e.printStackTrace()
+        layout_root.snackbar("Error occured during file handling")
+        Log.d("Upload Failed", "File Upload failed")
+        progress_bar.progress = 0
+    }
     }
 
     private fun openImageChooser() {
@@ -145,7 +161,7 @@ class MainActivity : AppCompatActivity(), UploadRequestBody.UploadCallback {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == Activity.RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 REQUEST_CODE_IMAGE -> {
                     selectedImageUri = data?.data
@@ -162,7 +178,7 @@ class MainActivity : AppCompatActivity(), UploadRequestBody.UploadCallback {
     }
 
     override fun onProgressUpdate(percentage: Int) {
-        TODO("Not yet implemented")
+        progress_bar.progress = percentage
     }
 }
 
