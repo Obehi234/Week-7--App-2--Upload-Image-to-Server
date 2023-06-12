@@ -2,8 +2,6 @@ package com.example.week7_app2_uploadfiletoserver
 
 import android.os.Handler
 import android.os.Looper
-import okhttp3.MediaType
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okio.BufferedSink
@@ -33,6 +31,7 @@ class UploadRequestBody(
             while (inputStream.read(buffer).also {
                     read = it
                 } != -1) {
+                handler.post(ProgressUpdater(uploaded, length))
                 uploaded += read
                 sink.write(buffer, 0, read)
             }
@@ -52,7 +51,7 @@ interface UploadCallback {
 
     }
     companion object {
-        private const val DEFAULT_BUFFER_SIZE = 2048
+        private const val DEFAULT_BUFFER_SIZE = 1048
 
     }
 

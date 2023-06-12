@@ -6,21 +6,19 @@ import android.content.ContentResolver
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.OpenableColumns
 import android.util.Log
 import android.view.View
-import android.webkit.PermissionRequest
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -31,7 +29,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.security.Permission
 
 class MainActivity : AppCompatActivity(), UploadRequestBody.UploadCallback {
     private var selectedImageUri: Uri? = null
@@ -106,6 +103,7 @@ class MainActivity : AppCompatActivity(), UploadRequestBody.UploadCallback {
             selectedImageUri!!, "r", null
         ) ?: return
 
+
         val inputStream = FileInputStream(parcelFileDescriptor.fileDescriptor)
         val file = File(cacheDir, contentResolver.getFileName(selectedImageUri!!))
         val outputStream = FileOutputStream(file)
@@ -127,11 +125,11 @@ class MainActivity : AppCompatActivity(), UploadRequestBody.UploadCallback {
                 call: Call<UploadResponse>,
                 response: Response<UploadResponse>
             ) {
-                response.body()?.let {
-                    layout_root.snackbar(it.message)
+
                     Log.d("File Upload", "File Upload Successful")
                     progress_bar.progress = 100
-                }
+                    layout_root.snackbar(response.body()?.message.toString())
+
             }
 
             override fun onFailure(call: Call<UploadResponse>, t: Throwable) {
